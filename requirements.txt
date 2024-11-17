@@ -1,0 +1,5 @@
+aiohttp
+cloudscraper
+fake-useragent
+loguru
+python-dateutil
