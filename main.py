@@ -44,8 +44,8 @@ print(f"🌐 Loaded {proxy_count} proxies.")
 print()
 
 # Constants
-PING_INTERVAL = 0.5
-RETRIES_LIMIT = 35
+PING_INTERVAL = 0.4
+RETRIES_LIMIT = 60
 
 # API Endpoints
 DOMAIN_API_ENDPOINTS = {
@@ -118,7 +118,7 @@ async def send_request(url, payload, proxy, token):
     try:
         scraper = cloudscraper.create_scraper()
         proxies = {"http": proxy, "https": proxy} if proxy else None
-        response = scraper.post(url, json=payload, headers=headers, proxies=proxies, timeout=30)
+        response = scraper.post(url, json=payload, headers=headers, proxies=proxies, timeout=60)
         response.raise_for_status()
         return validate_response(response.json())
     except Exception as e:
