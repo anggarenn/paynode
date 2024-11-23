@@ -44,8 +44,8 @@ print(f"🌐 Loaded {proxy_count} proxies.")
 print()
 
 # Constants
-PING_INTERVAL = 1
-RETRIES_LIMIT = 60
+PING_INTERVAL = 0.5
+RETRIES_LIMIT = 35
 
 # API Endpoints
 DOMAIN_API_ENDPOINTS = {
