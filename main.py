@@ -2,17 +2,10 @@ import asyncio
 import aiohttp
 import time
 import uuid
-import cloudscraper
-from fake_useragent import UserAgent
 import re
-from datetime import datetime, timezone, timedelta
-import requests
-from dateutil import parser
-from loguru import logger
-import itertools
-import threading
-import sys
+from fake_useragent import UserAgent
 import pyfiglet
+from loguru import logger
 
 # main.py
 def print_header():
@@ -41,10 +34,12 @@ tokens_content, proxy_count = read_tokens_and_proxy()
 print()
 print(f"🔑 Tokens: {tokens_content}.")
 print(f"🌐 Loaded {proxy_count} proxies.")
+print(f"🧩 Nodepay limits only 3 connections per account. Using multiple proxies is unnecessary.")
 print()
 
 # Constants
-PING_INTERVAL = 0.4
+HIDE_PROXY = "(🌐🔒🧩)"
+PING_INTERVAL = 1
 RETRIES_LIMIT = 60
 
 # API Endpoints
@@ -103,6 +98,7 @@ async def initialize_profile(proxy, token):
         if "keepalive ping timeout" in error_message or "500 Internal Server Error" in error_message:
             remove_proxy(proxy)
         else:
+            logger.error(f"🔴 Error: {error_message}")
             return proxy
 
 async def send_request(url, payload, proxy, token):
@@ -115,15 +111,14 @@ async def send_request(url, payload, proxy, token):
         "Referer": "https://app.nodepay.ai",
     }
 
-    try:
-        scraper = cloudscraper.create_scraper()
-        proxies = {"http": proxy, "https": proxy} if proxy else None
-        response = scraper.post(url, json=payload, headers=headers, proxies=proxies, timeout=60)
-        response.raise_for_status()
-        return validate_response(response.json())
-    except Exception as e:
-        logger.error(f"🔴 API request to {url} failed: {str(e)}")
-        raise ValueError(f"API request failed")
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(url, json=payload, headers=headers, proxy=proxy, timeout=60) as response:
+                response.raise_for_status()
+                return await response.json()
+        except Exception as e:
+            logger.error(f"🔴 API request to {url} failed: {str(e)}")
+            raise ValueError(f"API request failed")
 
 async def start_ping_loop(proxy, token):
     try:
@@ -163,7 +158,7 @@ def handle_ping_failure(proxy, response):
     if response and response.get("code") == 403:
         handle_logout(proxy)
     else:
-        logger.error(f"🔴 Ping failed for proxy.")
+        logger.error(f"🔴 Ping failed for proxy {HIDE_PROXY}.")
         remove_proxy(proxy)
         status_connect = CONNECTION_STATES["DISCONNECTED"]
 
