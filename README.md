@@ -1,5 +1,5 @@
 # xNodepayBot
-This bot connects via multiple HTTP proxies to farm Nodepay using a multi account. It automatically removes faulty proxies.
+This bot connects via multiple HTTP proxies to farm Nodepay using a multi account.
 
 ## Installation
 
@@ -13,6 +13,7 @@ This bot connects via multiple HTTP proxies to farm Nodepay using a multi accoun
    git clone https://github.com/officialputuid/xNodepayBot && cd xNodepayBot
    python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
    python3 main.py
+   python3 dailyclaim.py
    ```
 
 ## Token
@@ -38,8 +39,8 @@ This bot connects via multiple HTTP proxies to farm Nodepay using a multi accoun
 2. Go to [Plans](https://app.proxies.fo/plans) and only purchase the "ISP plan" (Residential plans don’t work).
 3. Top up your balance, or you can directly buy a plan and pay with Crypto!
 4. Go to the Dashboard, select your ISP plan, and click "Generate Proxy."
-5. Set the proxy format to `protocol://username:password@hostname:port` and choose any number for the proxy count.
-6. Paste the proxies into `proxy.txt`.
+5. Set the proxy format to `protocol://username:password@hostname:port`
+6. Choose any number for the proxy count, and paste the proxies into `proxy.txt`.
 
 ## Donations
 - **PayPal**: [Paypal.me/IPJAP](https://www.paypal.com/paypalme/IPJAP)

@@ -1,4 +1,5 @@
 aiohttp
+curl_cffi
 cloudscraper
 fake-useragent
 loguru
