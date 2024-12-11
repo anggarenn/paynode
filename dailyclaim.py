@@ -3,11 +3,14 @@ from curl_cffi import requests
 import pyfiglet
 import time
 
-# Set up logger format
 logger.remove()
 logger.add(
     sink=lambda msg: print(msg, end=''),
-    format="{time:DD/MM/YY HH:mm:ss} | <level>{level:8}</level> | <level>{message}</level>"
+    format=(
+        "<green>{time:DD/MM/YY HH:mm:ss}</green> | "
+        "<level>{level:8} | {message}</level>"
+    ),
+    colorize=True
 )
 
 # main.py
