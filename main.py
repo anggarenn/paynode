@@ -112,7 +112,7 @@ async def initialize_profile(proxy, token):
         if "keepalive ping timeout" in error_message or "500 Internal Server Error" in error_message:
             remove_proxy(proxy)
         else:
-            logger.error(f"🔴 Error: {error_message}")
+            logger.error(f"Error: {error_message}")
             return proxy
 
 async def send_request(url, payload, proxy, token):
@@ -131,7 +131,7 @@ async def send_request(url, payload, proxy, token):
                 response.raise_for_status()
                 return await response.json()
         except Exception as e:
-            logger.error(f"Token: {truncate_token(token)} | API request to {url} failed: {str(e)}")
+            logger.error(f"Token: {truncate_token(token)} | API request failed, Error: {str(e)[:32]}**")
             raise ValueError(f"API request failed")
 
 async def start_ping_loop(proxy, token):
