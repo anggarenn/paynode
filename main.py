@@ -51,6 +51,7 @@ print()
 # Constants
 PING_INTERVAL = 60
 RETRIES_LIMIT = 60
+PROXIES_PER_TOKEN = 5
 
 # API Endpoints
 DOMAIN_API_ENDPOINTS = {
@@ -88,8 +89,8 @@ def validate_response(response):
     return response
 
 async def initialize_profile(proxy, token):
-    await asyncio.sleep(random.uniform(2.0, 4.0))
     global browser_id, account_info
+    await asyncio.sleep(random.uniform(1.0, 3.0))
     try:
         session_info = load_session_info(proxy)
 
@@ -137,7 +138,7 @@ async def send_request(url, payload, proxy, token):
 async def start_ping_loop(proxy, token):
     try:
         while True:
-            await asyncio.sleep(random.uniform(2.0, 4.0))
+            await asyncio.sleep(random.uniform(1.0, 3.0))
             await send_ping(proxy, token)
             await asyncio.sleep(PING_INTERVAL)
     except asyncio.CancelledError:
@@ -227,29 +228,36 @@ async def main():
         logger.error(f"No tokens provided. Exiting.")
         exit()
 
-    token_proxy_pairs = [(tokens[i % len(tokens)], proxy) for i, proxy in enumerate(proxies)] if use_proxy else [(token, "") for token in tokens]
-
-    tasks = []
-
-    for token, proxy in token_proxy_pairs:
-        tasks.append(asyncio.create_task(initialize_profile(proxy, token)))
-        await asyncio.sleep(random.uniform(2.0, 4.0))
-
-    try:
-        while True:
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            for result, (token, _) in zip(results, token_proxy_pairs):
-                if isinstance(result, Exception):
-                    logger.error(f"Token: {truncate_token(token)} | Task encountered an error: {result}")
-                    logger.error(f"Token: {truncate_token(token)} | Stopping the program due to task error.")
-                    exit()
-                else:
-                    logger.success(f"Token: {truncate_token(token)} | Task completed successfully")
-
-            await asyncio.sleep(10)
-    except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
+    if use_proxy and len(proxies) < len(tokens) * PROXIES_PER_TOKEN:
+        logger.error(f"Insufficient proxies. You need at least {len(tokens) * PROXIES_PER_TOKEN} proxies for {len(tokens)} tokens.")
         exit()
+
+    while True:
+        logger.info("Starting a new cycle of tasks.")
+        token_proxy_pairs = []
+
+        if use_proxy:
+            for i, token in enumerate(tokens):
+                assigned_proxies = proxies[i * PROXIES_PER_TOKEN:(i + 1) * PROXIES_PER_TOKEN]
+                if len(assigned_proxies) < PROXIES_PER_TOKEN:
+                    logger.error(f"Not enough proxies assigned for token {truncate_token(token)}. Skipping this token.")
+                    continue
+
+                for proxy in assigned_proxies:
+                    token_proxy_pairs.append((token, proxy))
+        else:
+            token_proxy_pairs = [(token, "") for token in tokens]
+
+        tasks = []
+
+        for token, proxy in token_proxy_pairs:
+            tasks.append(asyncio.create_task(initialize_profile(proxy, token)))
+            await asyncio.sleep(random.uniform(1.0, 3.0))
+
+        await asyncio.gather(*tasks)
+
+        logger.info("All tasks completed. Waiting before starting a new cycle.")
+        await asyncio.sleep(10)
 
 if __name__ == "__main__":
     try:
